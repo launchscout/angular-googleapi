@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en" ng-app="demo" ng-controller="DemoCtrl">
+<head>
+  <meta charset="utf-8">
+  <title>Client-side authentication demo</title>
+</head>
+<body>
+
+<div>
+  <div>
+    <button ng-click="login()">Login</button>
+    <select name="calendar" ng-model="selectedCalendar" ng-options="cal.summary for cal in calendars"></select>
+    <button ng-click="loadCalendars()">Get Calendars</button>
+    <button ng-click="loadEvents()">Get Calendar Entries</button>
+  </div>
+
+  <ul>
+    <li ng-repeat="item in calendarItems">{{item.summary}}</li>
+  </ul>
+  <div ng-show="accessToken" style="display: none">
+    <h1>You're authenticated!</h1>
+
+    <h2>Access token</h2>
+    <pre>{{accessToken}}</pre>
+
+    <div ng-show="expiresIn">
+      <h2>Expiry</h2>
+      <p>Expires in {{expiresIn}} seconds.</p>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/angular.js"></script>
+
+<script src="src/angular-googleapi.js"></script>
+<script src="controllers.js"></script>
+<script src="https://apis.google.com/js/client.js"></script>
+</body>
+</html>
