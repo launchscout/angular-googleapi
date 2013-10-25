@@ -1,54 +1,10 @@
 angular.module('googleApi', [])
 	.value('version', '0.1')
 
-    .service('googleLogin', ['$http', '$rootScope', '$q', 'googleCalendar', function ($http, $rootScope, $q, googleCalendar) {
-        var clientId = '239511214798.apps.googleusercontent.com',
-            scopes = ["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/calendar"],
-            deferred = $q.defer();
+    .service("googleApiBuilder", function($q) {
+        this.loadClientCallbacks = [];
 
-        this.login = function () {
-            gapi.auth.authorize({ client_id: clientId, scope: scopes, immediate: false}, this.handleAuthResult);
-
-            return deferred.promise;
-        }
-
-        this.handleClientLoad = function () {
-            gapi.auth.init(function () { });
-            window.setTimeout(checkAuth, 1);
-        };
-
-        this.checkAuth = function() {
-            gapi.auth.authorize({ client_id: clientId, scope: scopes, immediate: true }, this.handleAuthResult );
-        };
-
-        this.handleAuthResult = function(authResult) {
-            if (authResult && !authResult.error) {
-                var data = {};
-                gapi.client.load('oauth2', 'v2', function () {
-                    var request = gapi.client.oauth2.userinfo.get();
-                    request.execute(function (resp) {
-                        $rootScope.$apply(function () {
-                            data.email = resp.email;
-                        });
-                    });
-                });
-                googleCalendar.loadClient();
-                deferred.resolve(data);
-            } else {
-                deferred.reject('error');
-            }
-        };
-
-        this.handleAuthClick = function (event) {
-            gapi.auth.authorize({ client_id: clientId, scope: scopes, immediate: false, hd: domain }, this.handleAuthResult );
-            return false;
-        };
-
-    }])
-
-    .service("googleCalendar", function($q, $rootScope) {
-
-        function gapiBuilder(requestBuilder) {
+        this.build = function(requestBuilder) {
             return function(args) {
                 var deferred = $q.defer();
                 request = requestBuilder(args);
@@ -64,15 +20,69 @@ angular.module('googleApi', [])
                 return deferred.promise;
 
             }
-        }
+        };
 
-        this.loadClient = function() {
-            var self = this;
+        this.afterClientLoaded = function(callback) {
+            this.loadClientCallbacks.push(callback);
+        };
+
+        this.runClientLoadedCallbacks = function() {
+            for(var i=0; i < this.loadClientCallbacks.length; i++) {
+                this.loadClientCallbacks[i]();
+            }
+        };
+    })
+
+    .provider('googleLogin', function() {
+
+        this.configure = function(conf) {
+            this.config = conf;
+        };
+
+        this.$get = function ($q, googleApiBuilder) {
+            var config = this.config;
+            var deferred = $q.defer();
+            return {
+                login: function () {
+                    gapi.auth.authorize({ client_id: config.clientId, scope: config.scopes, immediate: false}, this.handleAuthResult);
+
+                    return deferred.promise;
+                },
+
+                handleClientLoad: function () {
+                    gapi.auth.init(function () { });
+                    window.setTimeout(checkAuth, 1);
+                },
+
+                checkAuth: function() {
+                    gapi.auth.authorize({ client_id: clientId, scope: scopes, immediate: true }, this.handleAuthResult );
+                },
+
+                handleAuthResult: function(authResult) {
+                    if (authResult && !authResult.error) {
+                        var data = {};
+                        googleApiBuilder.runClientLoadedCallbacks();
+                        deferred.resolve(data);
+                    } else {
+                        deferred.reject(authResult.error);
+                    }
+                },
+            }
+        };
+
+
+    })
+
+    .service("googleCalendar", function(googleApiBuilder) {
+
+        var self = this;
+
+        googleApiBuilder.afterClientLoaded(function() {
             gapi.client.load('calendar', 'v3', function() {
-                self.listEvents = gapiBuilder(gapi.client.calendar.events.list);
-                self.listCalendars = gapiBuilder(gapi.client.calendar.calendarList.list);
+                self.listEvents = googleApiBuilder.build(gapi.client.calendar.events.list);
+                self.listCalendars = googleApiBuilder.build(gapi.client.calendar.calendarList.list);
             });
 
-        }
+        });
 
     });
