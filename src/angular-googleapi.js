@@ -4,16 +4,17 @@ angular.module('googleApi', [])
     .service("googleApiBuilder", function($q) {
         this.loadClientCallbacks = [];
 
-        this.build = function(requestBuilder) {
+        this.build = function(requestBuilder, responseTransformer) {
             return function(args) {
                 var deferred = $q.defer();
+                var response;
                 request = requestBuilder(args);
                 request.execute(function(resp, raw) {
                     if(resp.error) {
-                        console.log(resp.error);
                         deferred.reject(resp.error);
                     } else {
-                        deferred.resolve(resp.items);
+                        response = responseTransformer ? responseTransformer(resp) : resp;
+                        deferred.resolve(response);
                     }
 
                 });
@@ -76,11 +77,13 @@ angular.module('googleApi', [])
     .service("googleCalendar", function(googleApiBuilder) {
 
         var self = this;
+        var itemExtractor = function(resp) { return resp.items; };
 
         googleApiBuilder.afterClientLoaded(function() {
             gapi.client.load('calendar', 'v3', function() {
-                self.listEvents = googleApiBuilder.build(gapi.client.calendar.events.list);
-                self.listCalendars = googleApiBuilder.build(gapi.client.calendar.calendarList.list);
+                self.listEvents = googleApiBuilder.build(gapi.client.calendar.events.list, itemExtractor);
+                self.listCalendars = googleApiBuilder.build(gapi.client.calendar.calendarList.list, itemExtractor);
+                self.createEvent = googleApiBuilder.build(gapi.client.calendar.events.insert);
             });
 
         });
