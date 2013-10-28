@@ -1,0 +1,14 @@
+{
+  "name": "angular-googleapi",
+  "version": "0.0.1",
+  "main": "src/angular-googleapi.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components",
+    "bower_components",
+    "test",
+    "tests",
+    "vendor"
+  ]
+}

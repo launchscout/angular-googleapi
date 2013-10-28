@@ -40,7 +40,7 @@ angular.module('googleApi', [])
             this.config = conf;
         };
 
-        this.$get = function ($q, googleApiBuilder) {
+        this.$get = function ($q, googleApiBuilder, $rootScope) {
             var config = this.config;
             var deferred = $q.defer();
             return {
@@ -62,6 +62,7 @@ angular.module('googleApi', [])
                 handleAuthResult: function(authResult) {
                     if (authResult && !authResult.error) {
                         var data = {};
+                        $rootScope.$broadcast("google:authenticated", authResult);
                         googleApiBuilder.runClientLoadedCallbacks();
                         deferred.resolve(data);
                     } else {
@@ -74,7 +75,7 @@ angular.module('googleApi', [])
 
     })
 
-    .service("googleCalendar", function(googleApiBuilder) {
+    .service("googleCalendar", function(googleApiBuilder, $rootScope) {
 
         var self = this;
         var itemExtractor = function(resp) { return resp.items; };
@@ -84,6 +85,7 @@ angular.module('googleApi', [])
                 self.listEvents = googleApiBuilder.build(gapi.client.calendar.events.list, itemExtractor);
                 self.listCalendars = googleApiBuilder.build(gapi.client.calendar.calendarList.list, itemExtractor);
                 self.createEvent = googleApiBuilder.build(gapi.client.calendar.events.insert);
+                $rootScope.$broadcast("googleCalendar:loaded")
             });
 
         });
