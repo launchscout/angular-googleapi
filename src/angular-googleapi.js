@@ -82,12 +82,32 @@ angular.module('googleApi', [])
 
         googleApiBuilder.afterClientLoaded(function() {
             gapi.client.load('calendar', 'v3', function() {
+
                 self.listEvents = googleApiBuilder.build(gapi.client.calendar.events.list, itemExtractor);
                 self.listCalendars = googleApiBuilder.build(gapi.client.calendar.calendarList.list, itemExtractor);
                 self.createEvent = googleApiBuilder.build(gapi.client.calendar.events.insert);
+
                 $rootScope.$broadcast("googleCalendar:loaded")
             });
 
         });
 
-    });
+    })
+
+		.service("googlePlus", function(googleApiBuilder, $rootScope) {
+
+				var self = this;
+				var itemExtractor = function(resp) { return resp.items; };
+
+				googleApiBuilder.afterClientLoaded(function() {
+						gapi.client.load('plus', 'v1', function() {
+							self.getPeople = googleApiBuilder.build(gapi.client.plus.people.get);
+							self.getCurrentUser = function() {
+								return self.getPeople({userId: "me"});
+							}
+							$rootScope.$broadcast("googlePlus:loaded")
+						});
+
+				});
+
+		})

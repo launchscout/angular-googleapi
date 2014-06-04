@@ -17,16 +17,11 @@
   <ul>
     <li ng-repeat="item in calendarItems">{{item.summary}}</li>
   </ul>
-  <div ng-show="accessToken" style="display: none">
+  <div ng-show="currentUser">
     <h1>You're authenticated!</h1>
 
-    <h2>Access token</h2>
-    <pre>{{accessToken}}</pre>
+    Logged in as {{currentUser.displayName}}
 
-    <div ng-show="expiresIn">
-      <h2>Expiry</h2>
-      <p>Expires in {{expiresIn}} seconds.</p>
-    </div>
   </div>
 </div>
 
