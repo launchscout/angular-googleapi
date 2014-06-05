@@ -8,16 +8,16 @@
 
 <div>
   <div>
-    <button ng-click="login()">Login</button>
-    <select name="calendar" ng-model="selectedCalendar" ng-options="cal.summary for cal in calendars"></select>
-    <button ng-click="loadCalendars()">Get Calendars</button>
-    <button ng-click="loadEvents()">Get Calendar Entries</button>
+    <button ng-hide="authenticated" ng-click="login()">Login</button>
+    <select ng-show="authenticated" name="calendar" ng-model="selectedCalendar" ng-options="cal.summary for cal in calendars"></select>
+    <button ng-show="authenticated" ng-click="loadCalendars()">Get Calendars</button>
+    <button ng-show="authenticated" ng-click="loadEvents()">Get Calendar Entries</button>
   </div>
 
   <ul>
     <li ng-repeat="item in calendarItems">{{item.summary}}</li>
   </ul>
-  <div ng-show="currentUser">
+  <div ng-cloak ng-show="currentUser" >
     <h1>You're authenticated!</h1>
 
     Logged in as {{currentUser.displayName}}
