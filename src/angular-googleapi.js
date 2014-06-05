@@ -56,7 +56,7 @@ angular.module('googleApi', [])
                 },
 
                 checkAuth: function() {
-                    gapi.auth.authorize({ client_id: clientId, scope: scopes, immediate: true }, this.handleAuthResult );
+                    gapi.auth.authorize({ client_id: config.clientId, scope: config.scopes, immediate: true }, this.handleAuthResult );
                 },
 
                 handleAuthResult: function(authResult) {
