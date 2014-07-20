@@ -14,6 +14,16 @@ Or just download src/angular-googleapi.js
 
 Then in your angular module add angular-googleapi as a dependency.
 
+Usage
+-----
+
+The module will automatically load and initialize the Google API.
+There is no need to manually include a `<script>` element to load the API.
+Once the API is ready, it will broadcast a `google:ready` message to $rootScope.
+
+Once this has occurred, call `googleLogin.login()` to perform the login operation.
+This method returns a promise.
+
 Demo
 ----
 

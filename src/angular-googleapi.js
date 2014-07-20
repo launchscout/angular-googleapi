@@ -43,20 +43,11 @@ angular.module('googleApi', [])
         this.$get = function ($q, googleApiBuilder, $rootScope) {
             var config = this.config;
             var deferred = $q.defer();
-            return {
+            var svc = {
                 login: function () {
                     gapi.auth.authorize({ client_id: config.clientId, scope: config.scopes, immediate: false}, this.handleAuthResult);
 
                     return deferred.promise;
-                },
-
-                handleClientLoad: function () {
-                    gapi.auth.init(function () { });
-                    window.setTimeout(checkAuth, 1);
-                },
-
-                checkAuth: function() {
-                    gapi.auth.authorize({ client_id: config.clientId, scope: config.scopes, immediate: true }, this.handleAuthResult );
                 },
 
                 handleAuthResult: function(authResult) {
@@ -69,10 +60,21 @@ angular.module('googleApi', [])
                         deferred.reject(authResult.error);
                     }
                 },
-            }
+            };
+
+            // load the gapi client, instructing it to invoke a globally-accessible function when finished
+            window._googleApiLoaded = function() {
+                gapi.auth.init(function () {
+                    $rootScope.$broadcast("google:ready", {});
+                });
+            };
+            var script = document.createElement('script');
+            script.setAttribute("type","text/javascript");
+            script.setAttribute("src", "https://apis.google.com/js/client.js?onload=_googleApiLoaded");
+            document.getElementsByTagName("head")[0].appendChild(script);
+
+            return svc;
         };
-
-
     })
 
     .service("googleCalendar", function(googleApiBuilder, $rootScope) {
