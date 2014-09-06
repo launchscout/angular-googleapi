@@ -110,4 +110,4 @@ angular.module('googleApi', [])
 
 				});
 
-		})
+		});
