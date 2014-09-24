@@ -112,7 +112,16 @@
 
       });
 
-				});
+    })
+    .service("googleDrive", function(googleApiBuilder, $rootScope) {
+      var self = this;
+      var itemExtractor = function(resp) { return resp.items; };
+      googleApiBuilder.afterClientLoaded(function() {
+        gapi.client.load('drive', 'v2', function() {
+          self.listFiles = googleApiBuilder.build(gapi.client.drive.files.list);
+        });
+        $rootScope.$broadcast("googleDrive:loaded")
+      });
 
     });
 })();
