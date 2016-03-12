@@ -7,6 +7,24 @@ angular.module('demo', ["googleApi"])
     })
     .controller('DemoCtrl', ['$scope', 'googleLogin', 'googleCalendar', 'googlePlus', function ($scope, googleLogin, googleCalendar, googlePlus) {
 
+        $scope.authenticated = false;
+
+        $scope.$on("google:authenticated", function(){
+            $scope.authenticated = true;
+            $scope.$on('googleCalendar:loaded', function(){
+                $scope.calendars = googleCalendar.listCalendars();
+                $scope.$apply();
+            });
+        });
+
+        function checkAuth() {
+            setTimeout(function(){
+                gapi.auth === undefined ? checkAuth() : googleLogin.checkAuth();
+            }, 20);
+        }
+        checkAuth();
+
+
         $scope.login = function () {
             googleLogin.login();
         };
