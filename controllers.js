@@ -23,7 +23,9 @@ angular.module('demo', ["googleApi"])
         }
 
         $scope.loadCalendars = function() {
-            $scope.calendars = googleCalendar.listCalendars();
+            $googleCalendar.listCalendars().then(function(calendars){
+                $scope.calendars = calendars;
+            });
         }
 
     }]);
